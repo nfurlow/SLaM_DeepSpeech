@@ -5,7 +5,7 @@
 #   Copyright (C) 2020 Nathan Furlow                                           #
 ################################################################################
 
-import os, sys
+import os, sys, math
 
 try:
     from deepspeech import Model
@@ -19,33 +19,52 @@ except ImportError:
 os.environ['TF_CPP_MIN_LOG_LEVEL'] = '2'
 
 def transcriber(inputfile, outputfile, md):
+    toolbar_width = 40
     inputfile_len = file_len(inputfile)
+    if (inputfile_len > toolbar_width):
+        incriment = math.trunc(inputfile_len / toolbar_width)
+    else:
+        toolbar_width = inputfile_len
+        incriment = 1
+    count = 1
+    outputList = []
 
     BEAM_WIDTH = 500
-    LM_ALPHA = 1.50
-    LM_BETA = 2.10
+    LM_ALPHA = 0.00
+    LM_BETA = 0.00
 
     deep = Model(md + '/output_graph.pbmm', BEAM_WIDTH)
     enabled = deep.enableDecoderWithLM(md + '/lm.binary',
     md + '/trie',
     LM_ALPHA,
     LM_BETA)
-    print(enabled)
+    print('Decoder Enabled <0=true>:', enabled)
 
-    outputList = []
+    # setup toolbar
+    sys.stdout.write("[%s]" % (" " * toolbar_width))
+    sys.stdout.flush()
+    sys.stdout.write("\b" * (toolbar_width+1)) # return to start of line, after '['
 
     with open(inputfile, 'r') as reader:
         for line in reader.read().splitlines():
-            fs,audio = wav.read("$HOME/deepspeech-venv/SLaM_DeepSpeech/SLaM_DeepSpeech/temp/EnglishCCC_v1.2/confusionWavs_mono/T_" + line + "_mono.wav")
+            fs,audio = wav.read("/home/nat/deepspeech-venv/SLaM_DeepSpeech/SLaM_DeepSpeech/temp/EnglishCCC_v1.2/confusionWavs_mono/T_" + line + "_mono.wav")
             result = deep.stt(audio)
             outputList.append(result + "\n")
-            print(count, "/", inputfile_len)
+            #print(count, "/", inputfile_len)
+            if (count == incriment):
+                sys.stdout.write("-")
+                sys.stdout.flush()
+                count = 0
+            count += 1
 
-            with open(outputfile, 'w') as writer:
-                writer.writelines(outputList)
+    sys.stdout.write("]\n") # this ends the progress bar
+
+    with open(outputfile, 'w') as writer:
+            writer.writelines(outputList)
+
     return
 
-    def file_len(fname):
+def file_len(fname):
     with open(fname) as f:
         for i, l in enumerate(f):
             pass

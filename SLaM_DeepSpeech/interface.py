@@ -6,42 +6,48 @@
 ################################################################################
 
 import getopt, sys
-import transcriber
-import error_utils
+from transcriber import transcriber
+from error_utils import wer
 
 def main(argv):
     inputfile = ''
     outputfile = ''
-    errortype = ''
+    md = ''
+    errortype = 'word'
+    ground_truth = ''
     try:
-        opts, args = getopt.getopt(argv,"hi:o:md:r:",["ifile=","ofile=","md=","rtype="])
+        opts, args = getopt.getopt(argv,"hi:o:m:r:g:",["ifile=","ofile=","md=","rtype=","ground_truth="])
     except getopt.GetoptError:
-        print('interface.py -i <inputfile> -o <outputfile> -md <model directory> -r <errortype>')
+        print('interface.py -i <inputfile> -o <outputfile> -m <model directory> -r <errortype> -g <ground_truth>')
         sys.exit(2)
     for opt, arg in opts:
         if opt == '-h':
-            print('interface.py -i <inputfile> -o <outputfile> -md <model directory> -r <errortype>')
+            print('interface.py -i <inputfile> -o <outputfile> -m <model directory> -r <errortype> -g <ground_truth>')
             sys.exit()
         elif opt in ("-i", "--ifile"):
             inputfile = arg
         elif opt in ("-o", "--ofile"):
             outputfile = arg
-        elif opt in ("-md", "--md"):
-            lmPath = arg
+        elif opt in ("-m", "--md"):
+            md = arg
         elif opt in ("-r", "--rtype"):
             errortype = arg
-    print('Input file is', inputfile)
-    print('Output file is', outputfile)
-    print('Model Directory is', md)
-    print('Error Type is', errortype)
+        elif opt in ("-g", "--ground_truth"):
+            ground_truth = arg
+    print('\n')
+    print('Input file:', inputfile)
+    print('Output file:', outputfile)
+    print('Model Directory:', md)
+    print('Error Type:', errortype)
+    print('Ground Truth:', ground_truth)
 
     if (errortype != ("word" or "phone")) and errortype != '':
         print('Invalid errortype')
         return
 
-    transcriber(inputfile, outputfile, md)
+    transcriber.transcriber(inputfile, outputfile, md)
 
-    if ((errortype != '') and (errortype = 'word')):
-        wer(inputfile, outputfile)
-    if ((errortype != '') and (errortype = 'phone')):
-        per(inputfile, outputfile)
+    if ((errortype != '') and (errortype == 'word')):
+        print("WER is:", wer.wordError(outputfile, ground_truth))
+    if ((errortype != '') and (errortype == 'phone')):
+        per.per()
