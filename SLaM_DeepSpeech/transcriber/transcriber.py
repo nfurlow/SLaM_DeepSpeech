@@ -6,6 +6,7 @@
 ################################################################################
 
 import os, sys, math
+from sound_utils import sound_utils
 
 try:
     from deepspeech import Model
@@ -18,7 +19,7 @@ except ImportError:
 
 os.environ['TF_CPP_MIN_LOG_LEVEL'] = '2'
 
-def transcriber(inputfile, outputfile, md):
+def transcriber(inputfile, outputfile, md, lm_alpha, lm_beta):
     toolbar_width = 40
     inputfile_len = file_len(inputfile)
     if (inputfile_len > toolbar_width):
@@ -30,14 +31,12 @@ def transcriber(inputfile, outputfile, md):
     outputList = []
 
     BEAM_WIDTH = 500
-    LM_ALPHA = 0.00
-    LM_BETA = 0.00
 
     deep = Model(md + '/output_graph.pbmm', BEAM_WIDTH)
     enabled = deep.enableDecoderWithLM(md + '/lm.binary',
     md + '/trie',
-    LM_ALPHA,
-    LM_BETA)
+    lm_alpha,
+    lm_beta)
     print('Decoder Enabled <0=true>:', enabled)
 
     # setup toolbar
@@ -47,7 +46,14 @@ def transcriber(inputfile, outputfile, md):
 
     with open(inputfile, 'r') as reader:
         for line in reader.read().splitlines():
-            fs,audio = wav.read("/home/nat/deepspeech-venv/SLaM_DeepSpeech/SLaM_DeepSpeech/temp/EnglishCCC_v1.2/confusionWavs_mono/T_" + line + "_mono.wav")
+
+            try:
+                fs,audio = sound_utils.prepare_input("/home/nat/deepspeech-venv/SLaM_DeepSpeech/SLaM_DeepSpeech/temp/EnglishCCC_v1.2/confusionWavs/T_" + line + "_mono.wav")
+            except RuntimeError:
+                sound_utils.stereo_to_mono("/home/nat/deepspeech-venv/SLaM_DeepSpeech/SLaM_DeepSpeech/temp/EnglishCCC_v1.2/confusionWavs/T_" + line + ".wav")
+                fs,audio = sound_utils.prepare_input("/home/nat/deepspeech-venv/SLaM_DeepSpeech/SLaM_DeepSpeech/temp/EnglishCCC_v1.2/confusionWavs/T_" + line + "_mono.wav")
+
+
             result = deep.stt(audio)
             outputList.append(result + "\n")
             #print(count, "/", inputfile_len)

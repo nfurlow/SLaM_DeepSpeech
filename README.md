@@ -12,7 +12,7 @@ the SLaM lab at the University of Florida.
 ## Using the SLaM DeepSpeech Interface
 This interface is intended to make using DeepSpeech pre-trained models more
 compatible with large batches of audio files. It also includes build-in error
-calculations. Currently [Word Error Rate] is implemented using the [jiwer]
+calculations. Currently, [Word Error Rate] is implemented using the [jiwer]
 Package.
 
 [Word Error Rate]: https://en.wikipedia.org/wiki/Word_error_rate
@@ -32,3 +32,6 @@ pre-trained model
 transcriptions of the audio files listed in the inputfile; used to calculate
 error rate; transcriptions should be in the order of inputfile and separated by
 new lines
+* `-a` lm_alpha, the relative weight of language model vs. Correctionist
+Temporal Classification (CTC)
+* `-b` lm_beta, considers more words
