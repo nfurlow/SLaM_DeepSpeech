@@ -13,10 +13,10 @@ def main(argv):
     inputfile = ''
     outputfile = ''
     md = ''
-    errortype = 'word'
+    errortype = ''
     ground_truth = ''
-    lm_alpha = 1.50
-    lm_beta = 2.00
+    lm_alpha = 0.75
+    lm_beta = 1.85
     try:
         opts, args = getopt.getopt(argv,"hi:o:m:r:g:a:b:",["ifile=","ofile=","md=","rtype=","ground_truth=","lm_alpha=","lm_beta"])
     except getopt.GetoptError:
@@ -49,7 +49,7 @@ def main(argv):
     print('LM alpha:', lm_alpha)
     print('LM beta:', lm_beta)
 
-    if (errortype != ("word" or "phone")) and errortype != '':
+    if ((errortype != 'word') and (errortype != 'phone') and (errortype != '')):
         print('Invalid errortype')
         return
 

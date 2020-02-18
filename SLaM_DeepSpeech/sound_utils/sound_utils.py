@@ -1,6 +1,7 @@
 #!/usr/bin/env python3
 
 from pydub import AudioSegment
+import numpy as np
 
 def prepare_input(audio_path):
     """Ensures audio matches the sample rate supported by Deep Speech,

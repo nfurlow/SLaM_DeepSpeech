@@ -48,10 +48,10 @@ def transcriber(inputfile, outputfile, md, lm_alpha, lm_beta):
         for line in reader.read().splitlines():
 
             try:
-                fs,audio = sound_utils.prepare_input("/home/nat/deepspeech-venv/SLaM_DeepSpeech/SLaM_DeepSpeech/temp/EnglishCCC_v1.2/confusionWavs/T_" + line + "_mono.wav")
+                fs,audio = sound_utils.prepare_input("/home/nat/deepspeech-venv/SLaM_DeepSpeech/SLaM_DeepSpeech/temp/T_" + line + ".wav")
             except RuntimeError:
-                sound_utils.stereo_to_mono("/home/nat/deepspeech-venv/SLaM_DeepSpeech/SLaM_DeepSpeech/temp/EnglishCCC_v1.2/confusionWavs/T_" + line + ".wav")
-                fs,audio = sound_utils.prepare_input("/home/nat/deepspeech-venv/SLaM_DeepSpeech/SLaM_DeepSpeech/temp/EnglishCCC_v1.2/confusionWavs/T_" + line + "_mono.wav")
+                sound_utils.stereo_to_mono("/home/nat/deepspeech-venv/SLaM_DeepSpeech/SLaM_DeepSpeech/temp/T_" + line + ".wav")
+                fs,audio = sound_utils.prepare_input("/home/nat/deepspeech-venv/SLaM_DeepSpeech/SLaM_DeepSpeech/temp/T_" + line + "_mono.wav")
 
 
             result = deep.stt(audio)

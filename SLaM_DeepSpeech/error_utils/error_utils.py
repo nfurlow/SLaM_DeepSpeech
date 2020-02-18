@@ -28,8 +28,41 @@ def wordError(item):
 
 def phoneError(item):
     librispeech_lexicon = getDict()
-    
-    return
+    outputfile, ground_truth = item
+    hypothesis_list = []
+    ground_truth_list = []
+
+    with open(outputfile, 'r') as reader:
+        for line in reader.read().splitlines():
+            line_words = line.split(' ')
+            temp = ""
+            for element in line_words:
+                if (element in librispeech_lexicon):
+                    transcription = librispeech_lexicon.get(element)
+                    temp += transcription
+                else:
+                    hypothesis_list.append("\n")
+                    break
+                hypothesis_list.append(temp)
+
+    with open(ground_truth, 'r') as reader:
+        for line in reader.read().splitlines():
+            line_words = line.split(' ')
+            temp = ""
+            for element in line_words:
+                if (element in librispeech_lexicon):
+                    transcription = librispeech_lexicon.get(element)
+                    temp += transcription
+                else:
+                    ground_truth_list.append("\n")
+                    break
+            ground_truth_list.append(temp)
+    for e in ground_truth_list:
+        print(e + "\n")
+    for e in hypothesis_list:
+        print(e + "\n")
+
+    return wer(ground_truth_list, hypothesis_list)
 
 
 def getDict():
