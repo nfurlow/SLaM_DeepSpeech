@@ -101,11 +101,23 @@ def getTranscription(line):
 def getDict():
     librispeech_lexicon = {}
 
+    # FIXME: update absolute path to relative path
+
+    # open librispeech_lexicon
     with open("/home/nat/deepspeech-venv/SLaM_DeepSpeech/SLaM_DeepSpeech/references/librispeech-lexicon.txt") as f:
+
+        # loop through lines
         for line in f:
+
+            # remove trailing characters
             line = line.rstrip()
+
+            # split line at the first whitespace from the left
             (key, val) = line.split(None, 1)
+
+            # initialize key val structure
             librispeech_lexicon[str(key)] = val
+
         return librispeech_lexicon
 
 
