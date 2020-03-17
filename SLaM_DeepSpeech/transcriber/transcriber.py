@@ -47,23 +47,21 @@ def transcriber(inputdir, outputfile, md, lm_alpha, lm_beta):
     sys.stdout.flush()
     sys.stdout.write("\b" * (toolbar_width+1)) # return to start of line, after '['
 
-    for filename in os.listdir(path + inputdir):
+    filelist = sorted(os.listdir(path + inputdir))
+    for filename in filelist:
         with open(os.path.join(path + inputdir, filename), 'r') as f: # open in readonly mode
             # Check if filename end in _mono.wav, if yes, skip the file
             if filename.rsplit('_', 1)[1] == "mono.wav":
-                print("TRANSCRIBER: continue")
                 continue
 
             # Check if the file has an associated _mono.wav file in the directory
             if filename.rsplit('.', 1)[0] + "_mono.wav" in os.listdir(path + inputdir):
                 #if yes, prepare the _mono.wav file
                 fs,audio = sound_utils.prepare_input(path + inputdir +  "/" + filename.rsplit('.', 1)[0] + "_mono.wav")
-                print("TRANSCRIBER: mono exists")
             else:
                 #if no, create an _mono.wav file and prepare that file
                 sound_utils.stereo_to_mono(path + inputdir + "/" + filename)
                 fs,audio = sound_utils.prepare_input(path + inputdir +  "/" + filename.rsplit('.', 1)[0] + "_mono.wav")
-                print("TRANSCRIBER: audio prepared")
 
             # run prepared audio through DeepSpeech
             result = deep.stt(audio)

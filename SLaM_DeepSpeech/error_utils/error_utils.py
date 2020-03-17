@@ -53,7 +53,7 @@ def phoneError(item):
         for line in reader.read().splitlines():
 
             # assign temp variable with line transcription
-            temp = getTranscription(line)
+            temp = getTranscription(line.upper())
 
             # append complete transcription of the line to ground_truth_list
             ground_truth_list.append(temp)
