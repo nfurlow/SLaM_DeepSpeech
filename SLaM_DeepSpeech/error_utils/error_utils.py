@@ -44,7 +44,7 @@ def phoneError(item):
         for line in reader.read().splitlines():
 
             # assign temp variable with line transcription
-            temp = getTranscription(line)
+            temp = getTranscription(line.upper())
 
             # append complete transcription of the line to hypothesis_list
             hypothesis_list.append(temp)
@@ -88,7 +88,7 @@ def getTranscription(line):
             # return transcription for element
             elementTranscription = librispeech_lexicon.get(element)
             # concatinate transcription to the end of temp
-            fullTranscription = fullTranscription + elementTranscription
+            fullTranscription = fullTranscription + " " + elementTranscription
         else:
             # if any word in the line does not exist in the dictionary,
             # temp is assigned "*DNE*" and the loop ends

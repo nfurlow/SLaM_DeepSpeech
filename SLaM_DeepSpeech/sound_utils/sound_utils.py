@@ -40,8 +40,8 @@ def prepare_input(audio_path):
     # short utterances (a few seconds long)
     # print('Truncating audio from {}s to {}s'.format(len(audio)/sample_rate, duration_secs))
 
-    max_frames = sample_rate * duration_secs
-    audio = audio[:max_frames]
+    # max_frames = sample_rate * duration_secs
+    # audio = audio[:max_frames]
     return sample_rate, audio
 
 def stereo_to_mono(audio_path):

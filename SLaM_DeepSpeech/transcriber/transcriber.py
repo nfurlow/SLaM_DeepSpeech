@@ -10,22 +10,25 @@ from sound_utils import sound_utils
 
 try:
     from deepspeech import Model
+    import fnmatch
     import pyaudio
     import scipy.io.wavfile as wav
     import tensorflow as tf
 except ImportError:
-    print("Error: missing one of the libraries (deepspeech, pyaudio, scipy, tensorflow)")
+    print("Error: missing one of the libraries (deepspeech, fnmatch, pyaudio, scipy, tensorflow)")
     sys.exit()
 
+path = os.path.abspath(".")
 os.environ['TF_CPP_MIN_LOG_LEVEL'] = '2'
 
-def transcriber(inputfile, outputfile, md, lm_alpha, lm_beta):
+def transcriber(inputdir, outputfile, md, lm_alpha, lm_beta):
     toolbar_width = 40
-    inputfile_len = file_len(inputfile)
-    if (inputfile_len > toolbar_width):
-        incriment = math.trunc(inputfile_len / toolbar_width)
+    inputdir_len = len(fnmatch.filter(os.listdir(path + inputdir), '*.wav'))
+    print(inputdir_len)
+    if (inputdir_len > toolbar_width):
+        incriment = math.trunc(inputdir_len / toolbar_width)
     else:
-        toolbar_width = inputfile_len
+        toolbar_width = inputdir_len
         incriment = 1
     count = 1
     outputList = []
@@ -39,24 +42,35 @@ def transcriber(inputfile, outputfile, md, lm_alpha, lm_beta):
     lm_beta)
     print('Decoder Enabled <0=true>:', enabled)
 
-    # setup toolbar
+    # setup progress bar
     sys.stdout.write("[%s]" % (" " * toolbar_width))
     sys.stdout.flush()
     sys.stdout.write("\b" * (toolbar_width+1)) # return to start of line, after '['
 
-    with open(inputfile, 'r') as reader:
-        for line in reader.read().splitlines():
+    for filename in os.listdir(path + inputdir):
+        with open(os.path.join(path + inputdir, filename), 'r') as f: # open in readonly mode
+            # Check if filename end in _mono.wav, if yes, skip the file
+            if filename.rsplit('_', 1)[1] == "mono.wav":
+                print("TRANSCRIBER: continue")
+                continue
 
-            try:
-                fs,audio = sound_utils.prepare_input("/home/nat/deepspeech-venv/SLaM_DeepSpeech/SLaM_DeepSpeech/temp/T_" + line + ".wav")
-            except RuntimeError:
-                sound_utils.stereo_to_mono("/home/nat/deepspeech-venv/SLaM_DeepSpeech/SLaM_DeepSpeech/temp/T_" + line + ".wav")
-                fs,audio = sound_utils.prepare_input("/home/nat/deepspeech-venv/SLaM_DeepSpeech/SLaM_DeepSpeech/temp/T_" + line + "_mono.wav")
+            # Check if the file has an associated _mono.wav file in the directory
+            if filename.rsplit('.', 1)[0] + "_mono.wav" in os.listdir(path + inputdir):
+                #if yes, prepare the _mono.wav file
+                fs,audio = sound_utils.prepare_input(path + inputdir +  "/" + filename.rsplit('.', 1)[0] + "_mono.wav")
+                print("TRANSCRIBER: mono exists")
+            else:
+                #if no, create an _mono.wav file and prepare that file
+                sound_utils.stereo_to_mono(path + inputdir + "/" + filename)
+                fs,audio = sound_utils.prepare_input(path + inputdir +  "/" + filename.rsplit('.', 1)[0] + "_mono.wav")
+                print("TRANSCRIBER: audio prepared")
 
-
+            # run prepared audio through DeepSpeech
             result = deep.stt(audio)
+            # add the result to the outputList
             outputList.append(result + "\n")
-            #print(count, "/", inputfile_len)
+
+            # progress bar incriment
             if (count == incriment):
                 sys.stdout.write("-")
                 sys.stdout.flush()
@@ -65,13 +79,8 @@ def transcriber(inputfile, outputfile, md, lm_alpha, lm_beta):
 
     sys.stdout.write("]\n") # this ends the progress bar
 
+    # writes results to an output file
     with open(outputfile, 'w') as writer:
             writer.writelines(outputList)
 
     return
-
-def file_len(fname):
-    with open(fname) as f:
-        for i, l in enumerate(f):
-            pass
-    return i + 1
