@@ -38,3 +38,7 @@ for filename in os.listdir(path):
     # delete channel files
     os.remove(filename.rsplit('.', 1)[0] + '_left.wav')
     os.remove(filename.rsplit('.', 1)[0] + '_right.wav')
+
+
+# adjusting the intensity of the mixed files
+# what was the intensity of the file in the paper or readme

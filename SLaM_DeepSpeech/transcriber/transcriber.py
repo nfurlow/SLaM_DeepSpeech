@@ -50,6 +50,11 @@ def transcriber(inputdir, outputfile, md, lm_alpha, lm_beta):
     filelist = sorted(os.listdir(path + inputdir))
     for filename in filelist:
         with open(os.path.join(path + inputdir, filename), 'r') as f: # open in readonly mode
+
+            # if the file is not a wav file skip
+            if filename.rsplit('.', 1)[1] != "wav":
+                continue
+
             # Check if filename end in _mono.wav, if yes, skip the file
             if filename.rsplit('_', 1)[1] == "mono.wav":
                 continue
@@ -65,6 +70,7 @@ def transcriber(inputdir, outputfile, md, lm_alpha, lm_beta):
 
             # run prepared audio through DeepSpeech
             result = deep.stt(audio)
+            print("RESULT: " + result)
             # add the result to the outputList
             outputList.append(result + "\n")
 
