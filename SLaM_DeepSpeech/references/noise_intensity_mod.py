@@ -2,11 +2,14 @@ import os
 from pydub import AudioSegment
 from scipy.io import wavfile
 
+import parselmouth
+from parselmouth.praat import call
+
 path = os.path.abspath(".")
 
-gain = -5
+snrdBTarget = 10
 
-os.mkdir("gain" + str(abs(gain)))
+os.mkdir("snr" + str(abs(snrdBTarget)))
 
 for filename in os.listdir(path):
     if os.path.isdir(filename):
@@ -14,31 +17,40 @@ for filename in os.listdir(path):
         continue
     if filename == "noise_intensity_mod.py":
         continue
+    if filename.rsplit('_', 1)[1] == 'left.wav' or filename.rsplit('_', 1)[1] == 'right.wav':
+        continue
+    if filename.rsplit('_', 1)[1] == 'snr' + str(abs(snrdBTarget)) + '.wav':
+        continue
 
     print(filename)
     fs, data = wavfile.read(filename) # reading the file
 
     # signal
-    wavfile.write(filename.rsplit('.', 1)[0] + '_left.wav', fs, data[:, 0]) # saving first column which corresponds to channel 1
+    wavfile.write(filename.rsplit('.', 1)[0] + '_left.wav', fs, data[:, 0])
     # noise
-    wavfile.write(filename.rsplit('.', 1)[0] + '_right.wav', fs, data[:, 1]) # saving second column which corresponds to channel 2
+    wavfile.write(filename.rsplit('.', 1)[0] + '_right.wav', fs, data[:, 1])
 
-    signal = AudioSegment.from_file(path + "/" + filename.rsplit('.', 1)[0] + '_left.wav')
-    noise = AudioSegment.from_file(path + "/" + filename.rsplit('.', 1)[0] + '_right.wav')
+    sound = parselmouth.Sound(filename.rsplit('.', 1)[0] + '_left.wav')
+    noise = parselmouth.Sound(filename.rsplit('.', 1)[0] + '_right.wav')
 
-    # change gain by some dB
-    quieter_via_method = noise.apply_gain(gain)
+    dBSig_original = call(sound, 'Get intensity (dB)')
+    dBnoi_original = call(noise, 'Get intensity (dB)')
 
-    # make stereo audio segment from signal and nosie
-    stereo_sound = AudioSegment.from_mono_audiosegments(signal, noise)
+    noise_sampFreq = call(noise, 'Get sampling frequency')
+    targetsampFreq = call(sound, 'Get sampling frequency')
+    if noise_sampFreq != targetsampFreq:
+        noise = call(noise, 'Resample', targetsampFreq, 50)
 
-    # export
-    stereo_sound.export(path + "/gain" + str(abs(gain)) + "/" + filename.rsplit('.', 1)[0] + "_g" + str(abs(gain)) + ".wav", format="wav")
+    dBnoi_Target = dBSig_original - snrdBTarget
+
+    call(noise,'Scale intensity',dBnoi_Target)
+
+    targetwithnoise = parselmouth.Sound(sound.values + noise.values,
+         sampling_frequency = targetsampFreq)
+
+    targetwithnoise.save(path + '/' + 'snr' + str(abs(snrdBTarget)) + '/'
+        + filename.rsplit('.', 1)[0] + '_snr' + str(abs(snrdBTarget)) + '.wav', "WAV")
 
     # delete channel files
     os.remove(filename.rsplit('.', 1)[0] + '_left.wav')
     os.remove(filename.rsplit('.', 1)[0] + '_right.wav')
-
-
-# adjusting the intensity of the mixed files
-# what was the intensity of the file in the paper or readme
