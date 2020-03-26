@@ -24,11 +24,11 @@ def main(argv):
     try:
         opts, args = getopt.getopt(argv,"hi:o:m:r:g:a:b:",["idir=","ofile=","md=","rtype=","ground_truth=","lm_alpha=","lm_beta"])
     except getopt.GetoptError:
-        print('interface.py -i <inputdir> -m <model directory> -r <errortype> -g <ground_truth> -a <lm_alpha> -b <lm_beta>')
+        print('SLaM_DeepSpeech -i <inputdir> -m <model directory> -r <errortype> -g <ground_truth> -a <lm_alpha> -b <lm_beta>')
         sys.exit(2)
     for opt, arg in opts:
         if opt == '-h':
-            print('interface.py -i <inputdir> -m <model directory> -r <errortype> -g <ground_truth> -a <lm_alpha> -b <lm_beta>')
+            print('SLaM_DeepSpeech -i <inputdir> -m <model directory> -r <errortype> -g <ground_truth> -a <lm_alpha> -b <lm_beta>')
             sys.exit()
         elif opt in ("-i", "--idir"):
             inputdir = arg
