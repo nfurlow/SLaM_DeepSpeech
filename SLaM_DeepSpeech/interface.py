@@ -48,7 +48,7 @@ def main(argv):
     # Print received values for debug purposes
     print('\n')
     print('Input Directory:', inputdir)
-    print('Output file:', outputfile)
+    # print('Output file:', outputfile)
     print('Model Directory:', md)
     print('Error Type:', errortype)
     print('Ground Truth:', ground_truth)
@@ -61,7 +61,7 @@ def main(argv):
         return
 
     # Run transcriber
-    transcriber.transcriber(inputdir, outputfile, md, lm_alpha, lm_beta)
+    transcriber.transcriber(inputdir, md, lm_alpha, lm_beta)
 
     item = outputfile, ground_truth
 

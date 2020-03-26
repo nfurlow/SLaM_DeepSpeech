@@ -21,7 +21,7 @@ except ImportError:
 path = os.path.abspath(".")
 os.environ['TF_CPP_MIN_LOG_LEVEL'] = '2'
 
-def transcriber(inputdir, outputfile, md, lm_alpha, lm_beta):
+def transcriber(inputdir, md, lm_alpha, lm_beta):
     toolbar_width = 40
     inputdir_len = len(fnmatch.filter(os.listdir(path + inputdir), '*.wav'))
     print(inputdir_len)
@@ -48,6 +48,10 @@ def transcriber(inputdir, outputfile, md, lm_alpha, lm_beta):
     sys.stdout.write("\b" * (toolbar_width+1)) # return to start of line, after '['
 
     filelist = sorted(os.listdir(path + inputdir))
+    # writes filelist to an output file
+    with open(os.path.join(path + inputdir, inputdir.rsplit('/', 1)[1] + '_filelist.txt'), 'w') as writer:
+            writer.writelines('\n'.join(filelist) + '\n')
+
     for filename in filelist:
         with open(os.path.join(path + inputdir, filename), 'r') as f: # open in readonly mode
 
@@ -70,7 +74,8 @@ def transcriber(inputdir, outputfile, md, lm_alpha, lm_beta):
 
             # run prepared audio through DeepSpeech
             result = deep.stt(audio)
-            print("RESULT: " + result)
+            # remove generated processed file
+            os.remove(path + inputdir +  "/" + filename.rsplit('.', 1)[0] + "_mono.wav")
             # add the result to the outputList
             outputList.append(result + "\n")
 
@@ -84,7 +89,7 @@ def transcriber(inputdir, outputfile, md, lm_alpha, lm_beta):
     sys.stdout.write("]\n") # this ends the progress bar
 
     # writes results to an output file
-    with open(outputfile, 'w') as writer:
+    with open(os.path.join(path + inputdir, inputdir.rsplit('/', 1)[1] + '_output.txt'), 'w') as writer:
             writer.writelines(outputList)
 
     return
